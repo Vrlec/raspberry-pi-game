@@ -24,25 +24,14 @@ def configure_channels():
 # =====================================================================
 game_running = True
 SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-def pygame_configure():
-    pygame.init()
-
-# =====================================================================
-# Drawing fucntions
-# =====================================================================
-player = pygame.Rect((300, 250, 50, 50))
-
-def draw_window():
-    screen.fill((0, 0, 0))
-    pygame.draw.rect(screen, (255, 0, 0), player)
 
 # =====================================================================
 # Controls functions
 # =====================================================================
-def button_callback():
-    player.size(255, 255)
+def button_callback(asdfsdfasdf):
+    # player.size(255, 255)
     print("Button pressed!")
 
 def generate_callback():
@@ -51,26 +40,26 @@ def generate_callback():
 # =====================================================================
 # Game loop
 # =====================================================================
-def game_loop():
-    while game_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_running = False
+# def game_loop():
+#     while game_running:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 game_running = False
 
-        current_state = (GPIO.input(SIA), GPIO.input(SIB))
-        if current_state != last_state:  # Detect state change
-            if last_state == (0, 0) and current_state == (0, 1):
-                player.move_ip(45, 0)
+#         current_state = (GPIO.input(SIA), GPIO.input(SIB))
+#         if current_state != last_state:  # Detect state change
+#             if last_state == (0, 0) and current_state == (0, 1):
+#                 player.move_ip(45, 0)
 
-            elif last_state == (0, 0) and current_state == (1, 0):
-                player.move_ip(-45, 0)
-        # Update the last state
-        last_state = current_state
+#             elif last_state == (0, 0) and current_state == (1, 0):
+#                 player.move_ip(-45, 0)
+#         # Update the last state
+#         last_state = current_state
 
-        pygame.display.flip()
-        sleep(0.001)  # Debounce delay
+#         pygame.display.flip()
+#         sleep(0.001)  # Debounce delay
 
-    pygame.quit()
+#     pygame.quit()
 
 if __name__ == '__main__' :
     try:
@@ -78,7 +67,34 @@ if __name__ == '__main__' :
         pygame.init()
         generate_callback()
         last_state = (GPIO.input(SIA), GPIO.input(SIB))
-        game_loop()
+        screen.fill((0, 0, 0))
+        player = pygame.Rect((300, 250, 50, 50))
+        pygame.draw.rect(screen, (255, 0, 0), player)
+
+        while game_running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_running = False
+
+            current_state = (GPIO.input(SIA), GPIO.input(SIB))
+            if current_state != last_state:  # Detect state change
+                if last_state == (0, 0) and current_state == (0, 1):
+                    print("asdfasdf")
+                    player.move_ip(45, 0)
+
+                elif last_state == (0, 0) and current_state == (1, 0):
+                    player.move_ip(-45, 0)
+                    print("öööö")
+
+            # Update the last state
+            last_state = current_state
+
+            pygame.display.flip()
+            sleep(0.001)  # Debounce delay
+
+        pygame.quit()
 
     except:
         pass
+    finally:
+        print("BYE BYE ^_^")
