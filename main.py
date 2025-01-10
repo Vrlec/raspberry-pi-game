@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import pygame
 import RPi.GPIO as GPIO
-from time import sleep
-
+import random
 # =====================================================================
 # Pin configuration
 # =====================================================================
@@ -48,11 +47,12 @@ class Player(pygame.sprite.Sprite):
 
 player = Player(250, 500)
 
-enemies = (
-    pygame.Rect((150, 100, 50, 50)),
-    pygame.Rect((50, 50, 50, 50)),
-    pygame.Rect((25, 300, 50, 50)),
-)
+MAX_STARS = 50
+MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 10
+MIN_STAR_LENGTH, MAX_STAR_LENGTH = 25, 125
+stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
+
+FPS = 120
 
 if __name__ == '__main__' :
     try:
@@ -64,14 +64,15 @@ if __name__ == '__main__' :
 
         while game_running:
             screen.fill((0, 0, 0))
-            screen.blit(player.image, player.rect)
 
-            for enemy in enemies:
-                pygame.draw.rect(screen, (255, 0, 0), enemy)
-                if enemy.y >= SCREEN_WIDTH:
-                    enemy.move_ip(0, -600)
+            for star in stars:
+                pygame.draw.rect(screen, (255, 255, 255), star)
+                if star.y >= SCREEN_WIDTH:
+                    star.move_ip(0, -745)
                 else:
-                    enemy.move_ip(0, 1)
+                    star.move_ip(0, 1)
+
+            screen.blit(player.image, player.rect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -91,7 +92,7 @@ if __name__ == '__main__' :
             last_state = current_state
 
             pygame.display.flip()
-            clock.tick(60)
+            clock.tick(FPS)
 
         pygame.quit()
 
