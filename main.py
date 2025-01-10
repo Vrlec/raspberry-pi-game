@@ -20,6 +20,7 @@ def configure_channels():
 # Pygame configuration
 # =====================================================================
 game_running = True
+FPS = 120
 SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -42,17 +43,20 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
 
     def move(self, dx: float, dy: float):
-        self.rect.x += dx
+        if 50 <= self.rect.x + dx <= SCREEN_HEIGHT - 50:
+            self.rect.x += dx
         self.rect.y += dy
 
 player = Player(250, 500)
 
+# =========================================================
+# Background stars
+# =====================================================================
 MAX_STARS = 50
-MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 10
+MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 7
 MIN_STAR_LENGTH, MAX_STAR_LENGTH = 25, 125
 stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
 
-FPS = 120
 
 if __name__ == '__main__' :
     try:
