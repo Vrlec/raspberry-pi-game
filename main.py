@@ -79,64 +79,67 @@ class Enemy(pygame.sprite.Sprite):
         self.passed_player_state_before = self.passed_player_state_now
         return enemies_dodged
 
-enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
+enemies = [Enemy(random.randint(50, 550), random.randint(-400, -10)) for asdf in range(10)]
 enemies_dodged = 0
+alive = True
 
 if __name__ == '__main__' :
-    try:
-        configure_channels()
-        pygame.init()
-        clock = pygame.time.Clock()
-        last_state = (GPIO.input(SIA), GPIO.input(SIB))
-        font_path = pygame.font.match_font("arial")
-        font = pygame.font.Font(font_path, 74)
+    configure_channels()
+    pygame.init()
+    clock = pygame.time.Clock()
+    last_state = (GPIO.input(SIA), GPIO.input(SIB))
+    font_path = pygame.font.match_font("arial")
+    font = pygame.font.Font(font_path, 74)
 
-        while game_running:
-            screen.fill((0, 0, 0))
+    while game_running:
+        screen.fill((0, 0, 0))
+        death_surface = font.render("you died.", True, (255, 0, 0))
+        death_rect = death_surface.get_rect(center = (300, 300))
 
-            if GPIO.input(SW) == 0:
-                player = Player(250, 500)
-                stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
-                enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
-                enemies_dodged = 0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_running = False
 
+        if GPIO.input(SW) == 0:
+            player = Player(250, 500)
+            stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
+            enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
+            enemies_dodged = 0
+            alive = True
+
+        if alive == True:
             for star in stars:
                 pygame.draw.rect(screen, (75, 75, 75), star)
                 if star.y >= SCREEN_WIDTH:
                     star.move_ip(0, -745)
                 else:
                     star.move_ip(0, random.randint(5, 6))
-
             for enemy in enemies:
                 screen.blit(enemy.image, enemy.rect)
-                enemies_dodged += enemy.move(0, random.randint(1, 3))
+                enemies_dodged += enemy.move(0, random.randint(1, 5))
+                if pygame.sprite.collide_rect(player, enemy):
+                    alive = False      
+
             screen.blit(player.image, player.rect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     game_running = False
-
             current_state = (GPIO.input(SIA), GPIO.input(SIB))
             if current_state != last_state:  # Detect state change
                 if last_state == (0, 0) and current_state == (0, 1):
                     player.move(45, 0)
-
                 elif last_state == (0, 0) and current_state == (1, 0):
                     player.move(-45, 0)
-
-            number_surface = font.render(str(enemies_dodged), True, (255, 255, 255))
-            number_rect = number_surface.get_rect(center=(400,300))
-
-            screen.blit(number_surface, number_rect)
             last_state = current_state
+        else:
+            screen.blit(death_surface, death_rect)
 
-            pygame.display.flip()
-            clock.tick(FPS)
-
-        pygame.quit()
-        sys.exit()
-
-    except:
-        pass
-    finally:
-        print("BYE BYE ^_^")
+        number_surface = font.render(str(enemies_dodged), True, (255, 255, 255))
+        number_rect = number_surface.get_rect(topleft = (100, 100))
+        
+        screen.blit(number_surface, number_rect)
+        pygame.display.flip()
+        clock.tick(FPS)
+    pygame.quit()
+    sys.exit()
