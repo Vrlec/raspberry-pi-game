@@ -48,7 +48,6 @@ class Player(pygame.sprite.Sprite):
 
 player = Player(250, 500)
 
-
 enemies = (
     pygame.Rect((150, 100, 50, 50)),
     pygame.Rect((50, 50, 50, 50)),
@@ -60,6 +59,7 @@ if __name__ == '__main__' :
         configure_channels()
         GPIO.add_event_detect(SW, GPIO.FALLING, callback = button_callback, bouncetime = 10)
         pygame.init()
+        clock = pygame.time.Clock()
         last_state = (GPIO.input(SIA), GPIO.input(SIB))
 
         while game_running:
@@ -91,7 +91,7 @@ if __name__ == '__main__' :
             last_state = current_state
 
             pygame.display.flip()
-            sleep(0.001)  # Debounce delay
+            clock.tick(60)
 
         pygame.quit()
 
