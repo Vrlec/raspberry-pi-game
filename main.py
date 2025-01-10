@@ -4,13 +4,12 @@ import RPi.GPIO as GPIO
 import random
 import sys
 # =====================================================================
-# Pin configuration
+# GPIO setup
 # =====================================================================
 SIA = 40
 SIB = 38
 SW = 36
 
-# GPIO setup
 def configure_channels():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(SIA, GPIO.IN, pull_up_down = GPIO.PUD_UP)
@@ -26,12 +25,6 @@ SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Raspberry Pi Projekt")
-
-# =====================================================================
-# Controls functions
-# =====================================================================
-def button_callback(asdfsdfasdf):
-    print("Button pressed!")
 
 # =====================================================================
 # Player
@@ -86,14 +79,12 @@ class Enemy(pygame.sprite.Sprite):
         self.passed_player_state_before = self.passed_player_state_now
         return enemies_dodged
 
-
-
 enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
 enemies_dodged = 0
+
 if __name__ == '__main__' :
     try:
         configure_channels()
-        GPIO.add_event_detect(SW, GPIO.FALLING, callback = button_callback, bouncetime = 10)
         pygame.init()
         clock = pygame.time.Clock()
         last_state = (GPIO.input(SIA), GPIO.input(SIB))
@@ -102,6 +93,12 @@ if __name__ == '__main__' :
 
         while game_running:
             screen.fill((0, 0, 0))
+
+            if GPIO.input(SW) == 0:
+                player = Player(250, 500)
+                stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
+                enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
+                enemies_dodged = 0
 
             for star in stars:
                 pygame.draw.rect(screen, (75, 75, 75), star)
@@ -131,7 +128,6 @@ if __name__ == '__main__' :
             number_rect = number_surface.get_rect(center=(400,300))
 
             screen.blit(number_surface, number_rect)
-            # Update the last state
             last_state = current_state
 
             pygame.display.flip()
