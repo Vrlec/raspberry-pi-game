@@ -2,6 +2,7 @@
 import pygame
 import RPi.GPIO as GPIO
 import random
+import sys
 # =====================================================================
 # Pin configuration
 # =====================================================================
@@ -20,11 +21,11 @@ def configure_channels():
 # Pygame configuration
 # =====================================================================
 game_running = True
-FPS = 120
+FPS = 150
 SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Raspberry Pi Projekt für die Petrus")
+pygame.display.set_caption("Raspberry Pi Projekt")
 
 # =====================================================================
 # Controls functions
@@ -52,12 +53,43 @@ player = Player(250, 500)
 # =========================================================
 # Background stars
 # =====================================================================
-MAX_STARS = 50
-MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 7
+MAX_STARS = 75
+MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 5
 MIN_STAR_LENGTH, MAX_STAR_LENGTH = 25, 125
 stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
 
+# =========================================================
+# Enemies
+# =====================================================================
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x: float, y: float):
+        super().__init__()  # Do not pass self here
+        self.passed_player_state_now = False
+        self.passed_player_state_before = False
+        self.image = pygame.image.load("./assets/enemy.gif").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
 
+    def move(self, dx: float, dy: float):
+        enemies_dodged = 0
+        self.passed_player_state_now = self.rect.y >= 500
+        if self.passed_player_state_now and self.passed_player_state_before != self.passed_player_state_now:
+            enemies_dodged += 1
+
+        if 50 <= self.rect.x + dx <= SCREEN_HEIGHT - 50:
+            self.rect.x += dx
+        if self.rect.y > SCREEN_HEIGHT + 50:
+            self.rect.x = random.randint(50, SCREEN_WIDTH + 50)
+            self.rect.y = random.randint(-350, -50)
+        else:
+            self.rect.y += dy
+        self.passed_player_state_before = self.passed_player_state_now
+        return enemies_dodged
+
+
+
+enemies = [Enemy(random.randint(50, 550), random.randint(-300, -25)) for asdf in range(10)]
+enemies_dodged = 0
 if __name__ == '__main__' :
     try:
         configure_channels()
@@ -65,17 +97,22 @@ if __name__ == '__main__' :
         pygame.init()
         clock = pygame.time.Clock()
         last_state = (GPIO.input(SIA), GPIO.input(SIB))
+        font_path = pygame.font.match_font("arial")
+        font = pygame.font.Font(font_path, 74)
 
         while game_running:
             screen.fill((0, 0, 0))
 
             for star in stars:
-                pygame.draw.rect(screen, (255, 255, 255), star)
+                pygame.draw.rect(screen, (75, 75, 75), star)
                 if star.y >= SCREEN_WIDTH:
                     star.move_ip(0, -745)
                 else:
-                    star.move_ip(0, 1)
+                    star.move_ip(0, random.randint(5, 6))
 
+            for enemy in enemies:
+                screen.blit(enemy.image, enemy.rect)
+                enemies_dodged += enemy.move(0, random.randint(1, 3))
             screen.blit(player.image, player.rect)
 
             for event in pygame.event.get():
@@ -85,13 +122,15 @@ if __name__ == '__main__' :
             current_state = (GPIO.input(SIA), GPIO.input(SIB))
             if current_state != last_state:  # Detect state change
                 if last_state == (0, 0) and current_state == (0, 1):
-                    print("asdfasdf")
                     player.move(45, 0)
 
                 elif last_state == (0, 0) and current_state == (1, 0):
                     player.move(-45, 0)
-                    print("öööö")
 
+            number_surface = font.render(str(enemies_dodged), True, (255, 255, 255))
+            number_rect = number_surface.get_rect(center=(400,300))
+
+            screen.blit(number_surface, number_rect)
             # Update the last state
             last_state = current_state
 
@@ -99,6 +138,7 @@ if __name__ == '__main__' :
             clock.tick(FPS)
 
         pygame.quit()
+        sys.exit()
 
     except:
         pass
