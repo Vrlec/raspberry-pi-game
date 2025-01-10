@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import pygame
 import RPi.GPIO as GPIO
-import sys
 from time import sleep
 
 # =====================================================================
@@ -9,7 +8,7 @@ from time import sleep
 # =====================================================================
 SIA = 40
 SIB = 38
-SW = 36 
+SW = 36
 
 # GPIO setup
 def configure_channels():
@@ -18,7 +17,6 @@ def configure_channels():
     GPIO.setup(SIB, GPIO.IN, pull_up_down = GPIO.PUD_UP)
     GPIO.setup(SW, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
-
 # =====================================================================
 # Pygame configuration
 # =====================================================================
@@ -26,52 +24,55 @@ game_running = True
 SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Raspberry Pi Projekt für die Petrus")
 
 # =====================================================================
 # Controls functions
 # =====================================================================
 def button_callback(asdfsdfasdf):
-    # player.size(255, 255)
     print("Button pressed!")
 
-def generate_callback():
-    GPIO.add_event_detect(SW, GPIO.FALLING, callback = button_callback, bouncetime=10)
-
 # =====================================================================
-# Game loop
+# Player
 # =====================================================================
-# def game_loop():
-#     while game_running:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 game_running = False
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x: float, y: float):
+        super().__init__()  # Do not pass self here
+        self.image = pygame.image.load("./assets/player.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
 
-#         current_state = (GPIO.input(SIA), GPIO.input(SIB))
-#         if current_state != last_state:  # Detect state change
-#             if last_state == (0, 0) and current_state == (0, 1):
-#                 player.move_ip(45, 0)
+    def move(self, dx: float, dy: float):
+        self.rect.x += dx
+        self.rect.y += dy
 
-#             elif last_state == (0, 0) and current_state == (1, 0):
-#                 player.move_ip(-45, 0)
-#         # Update the last state
-#         last_state = current_state
+player = Player(250, 500)
 
-#         pygame.display.flip()
-#         sleep(0.001)  # Debounce delay
 
-#     pygame.quit()
+enemies = (
+    pygame.Rect((150, 100, 50, 50)),
+    pygame.Rect((50, 50, 50, 50)),
+    pygame.Rect((25, 300, 50, 50)),
+)
 
 if __name__ == '__main__' :
     try:
         configure_channels()
+        GPIO.add_event_detect(SW, GPIO.FALLING, callback = button_callback, bouncetime = 10)
         pygame.init()
-        generate_callback()
         last_state = (GPIO.input(SIA), GPIO.input(SIB))
-        screen.fill((0, 0, 0))
-        player = pygame.Rect((300, 250, 50, 50))
-        pygame.draw.rect(screen, (255, 0, 0), player)
 
         while game_running:
+            screen.fill((0, 0, 0))
+            screen.blit(player.image, player.rect)
+
+            for enemy in enemies:
+                pygame.draw.rect(screen, (255, 0, 0), enemy)
+                if enemy.y >= SCREEN_WIDTH:
+                    enemy.move_ip(0, -600)
+                else:
+                    enemy.move_ip(0, 1)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     game_running = False
@@ -80,10 +81,10 @@ if __name__ == '__main__' :
             if current_state != last_state:  # Detect state change
                 if last_state == (0, 0) and current_state == (0, 1):
                     print("asdfasdf")
-                    player.move_ip(45, 0)
+                    player.move(45, 0)
 
                 elif last_state == (0, 0) and current_state == (1, 0):
-                    player.move_ip(-45, 0)
+                    player.move(-45, 0)
                     print("öööö")
 
             # Update the last state
