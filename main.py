@@ -16,9 +16,7 @@ def configure_channels():
     GPIO.setup(SIB, GPIO.IN, pull_up_down = GPIO.PUD_UP)
     GPIO.setup(SW, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
-# =====================================================================
 # Pygame configuration
-# =====================================================================
 game_running = True
 FPS = 150
 SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
@@ -26,9 +24,7 @@ SCREEN_WIDTH,SCREEN_HEIGHT = 600, 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Raspberry Pi Projekt")
 
-# =====================================================================
 # Player
-# =====================================================================
 class Player(pygame.sprite.Sprite):
     def __init__(self, x: float, y: float):
         super().__init__()  # Do not pass self here
@@ -43,17 +39,13 @@ class Player(pygame.sprite.Sprite):
 
 player = Player(250, 500)
 
-# =========================================================
 # Background stars
-# =====================================================================
 MAX_STARS = 75
 MIN_STAR_WIDTH, MAX_STAR_WIDTH = 1, 5
 MIN_STAR_LENGTH, MAX_STAR_LENGTH = 25, 125
 stars = [pygame.Rect((random.randint(0, SCREEN_WIDTH), random.randint(-10, SCREEN_HEIGHT), random.randint(MIN_STAR_WIDTH, MAX_STAR_WIDTH), random.randint(MIN_STAR_LENGTH, MAX_STAR_LENGTH))) for i in range(MAX_STARS)]
 
-# =========================================================
 # Enemies
-# =====================================================================
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x: float, y: float):
         super().__init__()  # Do not pass self here
@@ -83,6 +75,7 @@ enemies = [Enemy(random.randint(50, 550), random.randint(-400, -10)) for asdf in
 enemies_dodged = 0
 alive = True
 
+# logic of the game
 if __name__ == '__main__' :
     configure_channels()
     pygame.init()
