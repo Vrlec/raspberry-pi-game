@@ -116,7 +116,7 @@ if __name__ == '__main__' :
                     star.move_ip(0, random.randint(5, 6))
             for enemy in enemies:
                 screen.blit(enemy.image, enemy.rect)
-                enemies_dodged += enemy.move(0, random.randint(1, 5))
+                enemies_dodged += enemy.move(0, random.randint(1, 2))
                 if pygame.sprite.collide_rect(player, enemy):
                     alive = False      
 
